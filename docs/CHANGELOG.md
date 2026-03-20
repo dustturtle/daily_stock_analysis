@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### 文档
+
+- 📖 **技术架构分析与 MVP 复刻指南** — 新增 `docs/architecture-analysis.md`，涵盖项目定位与设计理念、分层架构详解、核心模块拆解（Pipeline / LLM Analyzer / 技术分析 / 数据源 Fallback / 通知系统）、数据流与执行流水线、设计模式总结、技术栈总览，以及 MVP 核心功能提炼与实现路线图。
+
 ### 修复
 
 - 🧾 **Web 报告透明度区复制按钮层级修复**（#749）— `ReportDetails` 中“原始分析结果 / 分析快照”的复制按钮补齐可点击层级，避免被下方 JSON 内容覆盖后出现按钮可见但无法点击的问题。
