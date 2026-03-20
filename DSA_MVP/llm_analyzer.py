@@ -83,7 +83,13 @@ def analyze(
         content = content.strip()
         if content.startswith("```"):
             lines = content.split("\n")
-            content = "\n".join(lines[1:-1])
+            if len(lines) >= 3:
+                content = "\n".join(lines[1:-1])
+            else:
+                # Single-line code block like ```json {...}```
+                content = content.strip("`").strip()
+                if content.startswith("json"):
+                    content = content[4:].strip()
         result = json.loads(content)
         # 校验必要字段
         for key in ("sentiment_score", "trend_prediction", "operation_advice"):

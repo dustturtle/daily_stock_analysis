@@ -128,6 +128,7 @@ def query_latest(
         记录列表（字典形式）
     """
     if not os.path.exists(db_path):
+        logger.debug("数据库文件不存在: %s", db_path)
         return []
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -151,6 +152,7 @@ def query_all_latest(
         记录列表（字典形式）
     """
     if not os.path.exists(db_path):
+        logger.debug("数据库文件不存在: %s", db_path)
         return []
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row

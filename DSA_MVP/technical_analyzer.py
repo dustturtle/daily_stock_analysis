@@ -74,6 +74,7 @@ def analyze(df: pd.DataFrame) -> Dict[str, Any]:
             (latest["close"] - prev["close"]) / prev["close"] * 100, 2
         )
     else:
+        logger.warning("前一交易日收盘价为 0，无法计算涨跌幅")
         change_pct = 0.0
 
     return {
