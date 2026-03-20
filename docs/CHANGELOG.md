@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - 📖 **技术架构分析与 MVP 复刻指南** — 新增 `docs/architecture-analysis.md`，涵盖项目定位与设计理念、分层架构详解、核心模块拆解（Pipeline / LLM Analyzer / 技术分析 / 数据源 Fallback / 通知系统）、数据流与执行流水线、设计模式总结、技术栈总览，以及 MVP 核心功能提炼与实现路线图。
 
+### 新增
+
+- 🚀 **DSA_MVP 最小化版本** — 新增 `DSA_MVP/` 子目录，实现完整的 MVP 分析流程：配置管理（`config.py`）、akshare 行情获取（`data_fetcher.py`）、MA+量能技术分析（`technical_analyzer.py`）、LLM 智能分析（`llm_analyzer.py`）、终端报告打印（`report.py`）、SQLite 持久化（`storage.py`）、CLI 主入口（`main.py`）。含 56 个单元测试和 GitHub Actions CI 工作流（`.github/workflows/mvp-ci.yml`）。
+
 ### 修复
 
 - 🧾 **Web 报告透明度区复制按钮层级修复**（#749）— `ReportDetails` 中“原始分析结果 / 分析快照”的复制按钮补齐可点击层级，避免被下方 JSON 内容覆盖后出现按钮可见但无法点击的问题。

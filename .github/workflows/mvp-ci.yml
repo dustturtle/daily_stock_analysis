@@ -1,0 +1,80 @@
+name: MVP CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "DSA_MVP/**"
+      - ".github/workflows/mvp-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "DSA_MVP/**"
+      - ".github/workflows/mvp-ci.yml"
+
+concurrency:
+  group: mvp-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mvp-test:
+    name: MVP Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: DSA_MVP/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r DSA_MVP/requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        working-directory: .
+        run: python -m pytest DSA_MVP/tests/ -v --tb=short
+
+      - name: Verify CLI entry point
+        working-directory: .
+        run: python -m DSA_MVP.main --help
+
+  mvp-lint:
+    name: MVP Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: DSA_MVP/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r DSA_MVP/requirements.txt
+          pip install flake8
+
+      - name: Lint with flake8
+        run: flake8 DSA_MVP/ --max-line-length=120 --exclude=__pycache__
+
+      - name: Compile check
+        run: |
+          python -m py_compile DSA_MVP/config.py
+          python -m py_compile DSA_MVP/data_fetcher.py
+          python -m py_compile DSA_MVP/technical_analyzer.py
+          python -m py_compile DSA_MVP/llm_analyzer.py
+          python -m py_compile DSA_MVP/report.py
+          python -m py_compile DSA_MVP/storage.py
+          python -m py_compile DSA_MVP/main.py
