@@ -16,6 +16,9 @@ concurrency:
   group: mvp-ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   mvp-test:
     name: MVP Tests
