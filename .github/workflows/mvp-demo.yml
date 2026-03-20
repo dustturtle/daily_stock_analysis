@@ -52,10 +52,12 @@ jobs:
           fi
 
       - name: 📦 上传分析报告
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: analysis-report
           path: reports/
+          if-no-files-found: warn
           retention-days: 30
 
       - name: 📡 运行 MVP 实时分析 (dry-run)
