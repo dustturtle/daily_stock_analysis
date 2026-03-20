@@ -40,7 +40,23 @@ jobs:
           pip install -r DSA_MVP/requirements.txt
 
       - name: 📊 运行 MVP 演示（自动 fallback 样本数据）
-        run: python -m DSA_MVP.demo
+        run: python -m DSA_MVP.demo --output-dir reports
+
+      - name: 📄 显示分析报告内容
+        if: always()
+        run: |
+          if ls reports/*.md 1>/dev/null 2>&1; then
+            cat reports/*.md
+          else
+            echo "⚠️ 未找到报告文件"
+          fi
+
+      - name: 📦 上传分析报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-report
+          path: reports/
+          retention-days: 30
 
       - name: 📡 运行 MVP 实时分析 (dry-run)
         run: python -m DSA_MVP --stocks 600519 --days 60 --dry-run

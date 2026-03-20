@@ -49,8 +49,76 @@ def _sample_kline_data() -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def run_demo() -> None:
-    """运行演示分析流程"""
+def _format_report_markdown(
+    stock_code: str,
+    stock_name: str,
+    tech_result: dict,
+    analysis: dict,
+    data_source: str,
+    data_count: int,
+) -> str:
+    """生成完整的 Markdown 格式分析报告文件内容"""
+    from datetime import datetime
+
+    score = analysis.get("sentiment_score", 50)
+    if score >= 60:
+        emoji = "🟢"
+    elif score >= 40:
+        emoji = "🟡"
+    else:
+        emoji = "🔴"
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    return (
+        f"# {emoji} {stock_name}（{stock_code}）分析报告\n"
+        f"\n"
+        f"> 生成时间: {now}  \n"
+        f"> 数据来源: {data_source}  \n"
+        f"> 数据范围: 最近 {data_count} 个交易日  \n"
+        f"\n"
+        f"---\n"
+        f"\n"
+        f"## 综合结论\n"
+        f"\n"
+        f"| 指标 | 值 |\n"
+        f"|------|----|\n"
+        f"| 综合评分 | **{score}/100** |\n"
+        f"| 趋势预测 | {analysis.get('trend_prediction', '未知')} |\n"
+        f"| 操作建议 | {analysis.get('operation_advice', '未知')} |\n"
+        f"\n"
+        f"## 技术面分析\n"
+        f"\n"
+        f"| 指标 | 值 |\n"
+        f"|------|----|\n"
+        f"| 当前价格 | {tech_result.get('price', 'N/A')} |\n"
+        f"| 涨跌幅 | {tech_result.get('change_pct', 'N/A')}% |\n"
+        f"| 均线状态 | {tech_result.get('trend', '未知')} |\n"
+        f"| MA5 | {tech_result.get('ma5', 'N/A')} |\n"
+        f"| MA10 | {tech_result.get('ma10', 'N/A')} |\n"
+        f"| MA20 | {tech_result.get('ma20', 'N/A')} |\n"
+        f"| 量能状态 | {tech_result.get('volume_status', '未知')} |\n"
+        f"\n"
+        f"## 分析摘要\n"
+        f"\n"
+        f"{analysis.get('analysis_summary', '暂无分析')}\n"
+        f"\n"
+        f"## ⚠️ 风险提示\n"
+        f"\n"
+        f"{analysis.get('risk_warning', '投资有风险，入市需谨慎。')}\n"
+        f"\n"
+        f"---\n"
+        f"\n"
+        f"*由 DSA MVP 自动生成*\n"
+    )
+
+
+def run_demo(output_dir: str = "") -> None:
+    """运行演示分析流程
+
+    Args:
+        output_dir: 报告输出目录。为空则不写文件。
+    """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -103,10 +171,22 @@ def run_demo() -> None:
         "risk_warning": "请配置 LLM_API_KEY 后运行完整分析。",
     }
 
-    # 生成报告
+    # 生成报告并打印到终端
     print("\n📝 生成分析报告...")
     report = format_report(stock_code, stock_name, tech_result, analysis)
     print_report(report)
+
+    # 保存 Markdown 报告文件
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+        md_report = _format_report_markdown(
+            stock_code, stock_name, tech_result, analysis,
+            data_source, len(df),
+        )
+        report_path = os.path.join(output_dir, f"{stock_code}_report.md")
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write(md_report)
+        print(f"📄 报告已保存: {report_path}")
 
     # 持久化
     print("💾 保存到数据库...")
@@ -135,4 +215,14 @@ def run_demo() -> None:
 
 
 if __name__ == "__main__":
-    run_demo()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="DSA MVP 演示")
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="",
+        help="保存 Markdown 报告的目录（留空则仅打印到终端）",
+    )
+    args = parser.parse_args()
+    run_demo(output_dir=args.output_dir)
