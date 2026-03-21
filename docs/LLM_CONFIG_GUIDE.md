@@ -8,11 +8,81 @@
 
 ## 快速导航：你应该看哪一节？
 
-1. **【新手小白】** "我只想赶紧把系统跑起来，越简单越好！" -> [指路【方式一：极简单模型配置】](#方式一极简单模型配置适合新手)
-2. **【进阶用户】** "我有好几个 Key，想配置备用模型，还要改自定义网址(Base URL)。" -> [指路【方式二：渠道(Channels)模式配置】](#方式二渠道channels模式配置适合进阶多模型)
-3. **【高玩老手】** "我要做复杂的负载均衡、请求路由、甚至多异构平台高可用！" -> [指路【方式三：YAML 高级配置】](#方式三yaml高级配置适合老手自定义)
-4. **【本地模型】** "我想用 Ollama 本地模型！" -> [指路【示例 4：使用 Ollama 本地模型】](#示例-4使用-ollama-本地模型)
-5. **【视觉模型】** "我想用图片识别股票代码！" -> [指路【扩展功能：看图模型(Vision)配置】](#扩展功能看图模型vision配置)
+1. **【GitHub Actions 用户】** "我 Fork 了仓库，怎么在 GitHub 上配置密钥？" -> [指路【GitHub Actions 密钥配置】](#github-actions-密钥配置)
+2. **【新手小白】** "我只想赶紧把系统跑起来，越简单越好！" -> [指路【方式一：极简单模型配置】](#方式一极简单模型配置适合新手)
+3. **【进阶用户】** "我有好几个 Key，想配置备用模型，还要改自定义网址(Base URL)。" -> [指路【方式二：渠道(Channels)模式配置】](#方式二渠道channels模式配置适合进阶多模型)
+4. **【高玩老手】** "我要做复杂的负载均衡、请求路由、甚至多异构平台高可用！" -> [指路【方式三：YAML 高级配置】](#方式三yaml高级配置适合老手自定义)
+5. **【本地模型】** "我想用 Ollama 本地模型！" -> [指路【示例 4：使用 Ollama 本地模型】](#示例-4使用-ollama-本地模型)
+6. **【视觉模型】** "我想用图片识别股票代码！" -> [指路【扩展功能：看图模型(Vision)配置】](#扩展功能看图模型vision配置)
+
+---
+
+## GitHub Actions 密钥配置
+
+> 如果你是通过 Fork 仓库 + GitHub Actions 来使用本项目，本节将告诉你如何安全地把 API Key 配置到 GitHub 上。
+> 如果你是本地运行或 Docker 部署，请直接跳到下方的[方式一](#方式一极简单模型配置适合新手)。
+
+### 密钥安全说明
+
+本项目**不会**在代码中硬编码任何 API Key。所有密钥均通过环境变量读取（`os.getenv()`），GitHub Actions 使用加密的 Repository Secrets 注入，不会出现在日志或代码中。`.env` 文件已被 `.gitignore` 排除，不会被提交到仓库。
+
+### 第一步：打开 Secrets 配置页面
+
+1. 进入你 Fork 的仓库页面
+2. 点击顶部的 **Settings**（设置）标签
+3. 左侧栏点击 **Secrets and variables** → **Actions**
+4. 你会看到两个标签页：
+   - **Secrets**（点 `New repository secret`）：存放 **API Key 等敏感信息**
+   - **Variables**（点 `New repository variable`）：存放 **模型名、股票列表等非敏感配置**
+
+### 第二步：配置 AI 模型密钥（至少选一个）
+
+在 **Secrets** 标签页下点击 `New repository secret`，根据你选择的 AI 平台添加对应密钥：
+
+| 你的选择 | Secret Name | Secret Value（填你的 Key） | 说明 |
+|---------|-------------|--------------------------|------|
+| **AIHubMix**（推荐，一 Key 多模型） | `AIHUBMIX_KEY` | `sk-xxxxxxxx` | [获取 Key](https://aihubmix.com/?aff=CfMq)，无需科学上网 |
+| **Gemini**（免费） | `GEMINI_API_KEY` | `AIzac...` | [获取 Key](https://aistudio.google.com/)，需科学上网 |
+| **OpenAI / 兼容平台** | `OPENAI_API_KEY` | `sk-xxxxxxxx` | 适用于 DeepSeek、通义千问等 OpenAI 兼容平台 |
+| **Anthropic Claude** | `ANTHROPIC_API_KEY` | `sk-ant-...` | [获取 Key](https://console.anthropic.com/) |
+
+> 💡 只需配置**一个**即可运行。系统优先级：Gemini > Anthropic > OpenAI (含 AIHubMix) > Ollama。
+
+如果使用 OpenAI 兼容平台（如 DeepSeek），还需要额外添加：
+
+| 配置位置 | Name | Value | 说明 |
+|---------|------|-------|------|
+| **Secrets** 或 **Variables** | `OPENAI_BASE_URL` | `https://api.deepseek.com/v1` | 平台的 API 地址 |
+| **Variables** | `OPENAI_MODEL` | `deepseek-chat` | 模型名称 |
+
+### 第三步：确认配置生效
+
+配置完成后，进入 **Actions** 标签页 → 选择 **每日股票分析** → 点击 **Run workflow** 手动触发一次。日志开头会显示配置检查结果：
+
+```
+📋 配置检查
+  Gemini API Key: ✅ 已配置
+  AIHubMix Key:   ⚪ 未配置
+  OpenAI API Key: ⚪ 未配置
+```
+
+如果你需要的 Key 显示 `✅ 已配置`，说明配置成功。
+
+### Secrets vs Variables 怎么区分？
+
+| 类型 | 适合存放 | 特点 |
+|------|---------|------|
+| **Secrets** | API Key、Token、密码、Webhook URL | 加密存储，日志中自动打码，不可查看原值 |
+| **Variables** | 模型名、股票列表、报告类型 | 明文存储，方便随时修改和查看 |
+
+以下是推荐的分配方式：
+
+| 存放位置 | 配置项 |
+|---------|--------|
+| **Secrets** | `GEMINI_API_KEY`、`OPENAI_API_KEY`、`ANTHROPIC_API_KEY`、`AIHUBMIX_KEY`、`LITELLM_API_KEY`、各类 Webhook URL / Token |
+| **Variables** | `STOCK_LIST`、`GEMINI_MODEL`、`OPENAI_MODEL`、`OPENAI_BASE_URL`、`REPORT_TYPE`、`LITELLM_MODEL` |
+
+> 📌 所有配置都可以放 Secrets（更安全），也可以放 Variables（方便查看）。工作流会按 `Variables 优先 → Secrets 兜底` 的顺序读取。
 
 ---
 
@@ -144,7 +214,9 @@ model_list:
       api_base: http://localhost:11434
 ```
 
-### GitHub Actions配置说明
+### GitHub Actions 中使用 YAML 高级配置
+
+> 基础密钥配置请先看 [GitHub Actions 密钥配置](#github-actions-密钥配置)。本节仅说明如何在 GitHub Actions 中启用 YAML 高级配置模式。
 
 1. `Settings` → `Secrets and variables` → `Actions` → `Secret`标签页下的`New repository secret` 或者 `Variables`标签页下的`New repository variable`
 
