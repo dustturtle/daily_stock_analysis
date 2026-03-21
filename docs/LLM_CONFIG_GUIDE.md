@@ -37,23 +37,70 @@
 
 ### 第二步：配置 AI 模型密钥（至少选一个）
 
-在 **Secrets** 标签页下点击 `New repository secret`，根据你选择的 AI 平台添加对应密钥：
+> 💡 **核心概念**：GitHub Secret 的 **Name** 就是本项目 `.env` 文件里等号左边的变量名（如 `OPENAI_API_KEY`），**Value** 就是等号右边你的实际密钥。把 `.env` 里的配置逐行搬到 GitHub Secrets 就行了。
 
-| 你的选择 | Secret Name | Secret Value（填你的 Key） | 说明 |
-|---------|-------------|--------------------------|------|
-| **AIHubMix**（推荐，一 Key 多模型） | `AIHUBMIX_KEY` | `sk-xxxxxxxx` | [获取 Key](https://aihubmix.com/?aff=CfMq)，无需科学上网 |
-| **Gemini**（免费） | `GEMINI_API_KEY` | `AIzac...` | [获取 Key](https://aistudio.google.com/)，需科学上网 |
-| **OpenAI / 兼容平台** | `OPENAI_API_KEY` | `sk-xxxxxxxx` | 适用于 DeepSeek、通义千问等 OpenAI 兼容平台 |
-| **Anthropic Claude** | `ANTHROPIC_API_KEY` | `sk-ant-...` | [获取 Key](https://console.anthropic.com/) |
+在 **Secrets** 标签页下点击 `New repository secret`，根据你用的 AI 平台，按下方示例添加。
 
-> 💡 只需配置**一个**即可运行。系统优先级：Gemini > Anthropic > OpenAI (含 AIHubMix) > Ollama。
+---
 
-如果使用 OpenAI 兼容平台（如 DeepSeek），还需要额外添加：
+#### 示例 A：使用硅基流动 / SiliconFlow（需要自定义 URL）
 
-| 配置位置 | Name | Value | 说明 |
-|---------|------|-------|------|
-| **Secrets** 或 **Variables** | `OPENAI_BASE_URL` | `https://api.deepseek.com/v1` | 平台的 API 地址 |
-| **Variables** | `OPENAI_MODEL` | `deepseek-chat` | 模型名称 |
+硅基流动、阿里百炼、智谱等第三方平台都兼容 OpenAI 格式，需要配置 3 个条目：
+
+| 第几次点 New secret/variable | Name（原样复制） | Value（填你自己的） | 放在哪里 |
+|:---:|------|-------|:---:|
+| ① | `OPENAI_API_KEY` | `sk-xxxxxxxxxxxxxx`（你在硅基流动获取的 Key） | **Secrets** |
+| ② | `OPENAI_BASE_URL` | `https://api.siliconflow.cn/v1` | **Variables** |
+| ③ | `LITELLM_MODEL` | `openai/deepseek-ai/DeepSeek-V3`（在硅基流动选的模型名，前面加 `openai/`） | **Variables** |
+
+**操作步骤**：
+1. 点 `New repository secret` → Name 填 `OPENAI_API_KEY` → Secret 填你的 Key → 点 **Add secret**
+2. 切到 **Variables** 标签页 → 点 `New repository variable` → Name 填 `OPENAI_BASE_URL` → Value 填 `https://api.siliconflow.cn/v1` → 点 **Add variable**
+3. 再次点 `New repository variable` → Name 填 `LITELLM_MODEL` → Value 填 `openai/deepseek-ai/DeepSeek-V3` → 点 **Add variable**
+
+> 其他兼容 OpenAI 格式的平台（阿里百炼、智谱等）操作完全相同，只需替换 URL 和模型名。
+
+---
+
+#### 示例 B：使用 DeepSeek 官方（需要自定义 URL）
+
+| 第几次点 New secret/variable | Name（原样复制） | Value（填你自己的） | 放在哪里 |
+|:---:|------|-------|:---:|
+| ① | `OPENAI_API_KEY` | `sk-xxxxxxxxxxxxxx`（你在 DeepSeek 获取的 Key） | **Secrets** |
+| ② | `OPENAI_BASE_URL` | `https://api.deepseek.com/v1` | **Variables** |
+| ③ | `OPENAI_MODEL` | `deepseek-chat` | **Variables** |
+
+---
+
+#### 示例 C：使用 Gemini 免费 API（最简单，1 个 Secret 即可）
+
+| 第几次点 New secret | Name（原样复制） | Value（填你自己的） | 放在哪里 |
+|:---:|------|-------|:---:|
+| ① | `GEMINI_API_KEY` | `AIzaSy...`（你在 [Google AI Studio](https://aistudio.google.com/) 获取的 Key） | **Secrets** |
+
+> 只需这 1 个即可运行，无需填 URL 和模型名。
+
+---
+
+#### 示例 D：使用 AIHubMix（一 Key 多模型，推荐国内用户）
+
+| 第几次点 New secret | Name（原样复制） | Value（填你自己的） | 放在哪里 |
+|:---:|------|-------|:---:|
+| ① | `AIHUBMIX_KEY` | `sk-xxxxxxxxxxxxxx`（[获取 Key](https://aihubmix.com/?aff=CfMq)） | **Secrets** |
+
+> 只需这 1 个即可运行。系统自动适配 URL，无需填 `OPENAI_BASE_URL`。
+
+---
+
+#### 示例 E：使用 Anthropic Claude
+
+| 第几次点 New secret | Name（原样复制） | Value（填你自己的） | 放在哪里 |
+|:---:|------|-------|:---:|
+| ① | `ANTHROPIC_API_KEY` | `sk-ant-xxxxxx`（[获取 Key](https://console.anthropic.com/)） | **Secrets** |
+
+---
+
+> 💡 以上示例**选一个**照做即可。系统优先级：Gemini > Anthropic > OpenAI（含 AIHubMix / 硅基流动） > Ollama。
 
 ### 第三步：确认配置生效
 
