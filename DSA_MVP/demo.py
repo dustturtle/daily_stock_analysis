@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 import tempfile
+from typing import Optional
 
 import pandas as pd
 
@@ -113,11 +114,11 @@ def _format_report_markdown(
     )
 
 
-def run_demo(output_dir: str = "") -> None:
+def run_demo(output_dir: Optional[str] = None) -> None:
     """运行演示分析流程
 
     Args:
-        output_dir: 报告输出目录。为空则不写文件。
+        output_dir: 报告输出目录。为 None 则不写文件。
     """
     logging.basicConfig(
         level=logging.INFO,
@@ -177,7 +178,7 @@ def run_demo(output_dir: str = "") -> None:
     print_report(report)
 
     # 保存 Markdown 报告文件
-    if output_dir:
+    if output_dir is not None:
         os.makedirs(output_dir, exist_ok=True)
         md_report = _format_report_markdown(
             stock_code, stock_name, tech_result, analysis,
@@ -221,7 +222,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="",
+        default=None,
         help="保存 Markdown 报告的目录（留空则仅打印到终端）",
     )
     args = parser.parse_args()
